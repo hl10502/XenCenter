@@ -1,0 +1,259 @@
+﻿/* Copyright (c) Citrix Systems, Inc. 
+ * All rights reserved. 
+ * 
+ * Redistribution and use in source and binary forms, 
+ * with or without modification, are permitted provided 
+ * that the following conditions are met: 
+ * 
+ * *   Redistributions of source code must retain the above 
+ *     copyright notice, this list of conditions and the 
+ *     following disclaimer. 
+ * *   Redistributions in binary form must reproduce the above 
+ *     copyright notice, this list of conditions and the 
+ *     following disclaimer in the documentation and/or other 
+ *     materials provided with the distribution. 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
+ * CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR 
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE 
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF 
+ * SUCH DAMAGE.
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
+using XenAdmin.Commands;
+using XenAdmin.Core;
+using XenAPI;
+
+namespace XenAdmin.Dialogs
+{
+    public partial class AssignLicenseDialog : XenDialogBase
+    {
+        private readonly List<IXenObject> xos;
+        private readonly Host.Edition currentEdition;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AssignLicenseDialog"/> class.
+        /// </summary>
+        /// <param name="hosts">The hosts for which the licensing is to be applied.</param>
+        public AssignLicenseDialog(IEnumerable<IXenObject> xos, String firstHost, String firstPort, Host.Edition firstEdition)
+        {
+            Util.ThrowIfEnumerableParameterNullOrEmpty(xos, "XenObjects");
+            this.xos = new List<IXenObject>(xos);
+            this.currentEdition = firstEdition;
+            InitializeComponent();
+            licenseServerNameTextBox.TextChanged += licenseServerPortTextBox_TextChanged;
+            licenseServerPortTextBox.TextChanged += licenseServerNameTextBox_TextChanged;
+            SetOptionsForClearwaterAndNewer();
+            UpdateButtonEnablement();
+
+            // if all the hosts have the same license server details then populate the textboxes.
+            List<Host> hosts = CreateHostsList();
+
+            if (hosts[0].license_server.ContainsKey("address") && hosts[0].license_server.ContainsKey("port") &&
+                hosts[0].license_server["address"] != "localhost")
+            {
+                if (hosts.TrueForAll(delegate(Host h)
+                {
+                    return h.license_server.ContainsKey("address") &&
+                        h.license_server.ContainsKey("port") &&
+                        h.license_server["address"] == hosts[0].license_server["address"] &&
+                        h.license_server["port"] == hosts[0].license_server["port"];
+                }))
+                {
+                    licenseServerPortTextBox.Text = hosts[0].license_server["port"];
+                    licenseServerNameTextBox.Text = hosts[0].license_server["address"];
+                }
+            }
+            else if ((!String.IsNullOrEmpty(firstHost)) && (!String.IsNullOrEmpty(firstPort)))
+            {
+                licenseServerPortTextBox.Text = firstPort;
+                licenseServerNameTextBox.Text = firstHost;
+            }
+        }
+
+        private List<Host> CreateHostsList()
+        {
+            List<Host> hosts = new List<Host>();
+            foreach (IXenObject xenObject in xos)
+            {
+                if(xenObject is Pool)
+                {
+                    Pool pool = xenObject as Pool;
+                    hosts.Add(xenObject.Connection.Resolve(pool.master));
+                }
+                if(xenObject is Host)
+                    hosts.Add(xenObject as Host);
+            }
+            return hosts;
+        }
+
+
+        /// <summary>
+        /// Not all license types apply for post-clearwater hosts. Hide them to declutter the UI
+        /// </summary>
+        private void SetOptionsForClearwaterAndNewer()
+        {
+            if (xos.TrueForAll(x => Helpers.CreedenceOrGreater(x.Connection)))
+            {
+                platinumRadioButton.Visible = false;
+                enterpriseRadioButton.Visible = false;
+                advancedRadioButton.Visible = false;
+                perSocketRadioButton.Visible = false;
+                xenDesktopEnterpriseRadioButton.Visible = false;
+                enterprisePerSocketRadioButton.Checked = true;
+                enterprisePerSocketRadioButton.Text = String.Format(Messages.ENTERPRISE_PERSOCKET_LICENSES_X_REQUIRED,
+                                                          xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets)));
+                standardPerSocketRadioButton.Text = String.Format(Messages.STANDARD_PERSOCKET_LICENSES_X_REQUIRED,
+                                                          xos.Sum(x => x.Connection.Cache.Hosts.Sum(h => h.CpuSockets)));
+            } else if(xos.TrueForAll(x=> Helpers.ClearwaterOrGreater(x.Connection)))
+            {
+                platinumRadioButton.Visible = false;
+                enterpriseRadioButton.Visible = false;
+                advancedRadioButton.Visible = false;
+                enterprisePerSocketRadioButton.Visible = false;
+                enterprisePerUserRadioButton.Visible = false;
+                standardPerSocketRadioButton.Visible = false;
+                desktopPlusRadioButton.Visible = false;
+                desktopRadioButton.Visible = false;
+                perSocketRadioButton.Checked = true;
+                perSocketRadioButton.Text = String.Format(Messages.PERSOCKET_LICENSES_X_REQUIRED,
+                                                          xos.Sum(x => x.Connection.Cache.Hosts.Sum(h=>h.CpuSockets)));
+            }
+            else
+            {
+                perSocketRadioButton.Visible = false;
+                enterprisePerSocketRadioButton.Visible = false;
+                enterprisePerUserRadioButton.Visible = false;
+                standardPerSocketRadioButton.Visible = false;
+                desktopPlusRadioButton.Visible = false;
+                desktopRadioButton.Visible = false;
+                advancedRadioButton.Checked = true;
+            }
+        }
+
+        private static void CheckRadioButtonIfVisible(RadioButton radioButton)
+        {
+            if (radioButton.Visible)
+                radioButton.Checked = true;
+        }
+
+        private void CheckCurrentEdition(Host.Edition currentEdition)
+        {
+            switch (currentEdition)
+            {
+                case Host.Edition.XenDesktop:
+                case Host.Edition.EnterpriseXD:
+                    CheckRadioButtonIfVisible(xenDesktopEnterpriseRadioButton);
+                    break;
+                case Host.Edition.Platinum:
+                    CheckRadioButtonIfVisible(platinumRadioButton);
+                    break;
+                case Host.Edition.Enterprise:
+                    CheckRadioButtonIfVisible(enterpriseRadioButton);
+                    break;
+                case  Host.Edition.Advanced:
+                    CheckRadioButtonIfVisible(advancedRadioButton);
+                    break;
+                case Host.Edition.PerSocket:
+                    CheckRadioButtonIfVisible(perSocketRadioButton);
+                    break;
+                case Host.Edition.EnterprisePerSocket:
+                    CheckRadioButtonIfVisible(enterprisePerSocketRadioButton);
+                    break;
+                case Host.Edition.EnterprisePerUser:
+                    CheckRadioButtonIfVisible(enterprisePerUserRadioButton);
+                    break;
+                case Host.Edition.StandardPerSocket:
+                    CheckRadioButtonIfVisible(standardPerSocketRadioButton);
+                    break;
+                case Host.Edition.Desktop:
+                    CheckRadioButtonIfVisible(desktopRadioButton);
+                    break;
+                case Host.Edition.DesktopPlus:
+                    CheckRadioButtonIfVisible(desktopPlusRadioButton);
+                    break;
+            }
+        }
+
+        private Host.Edition GetCheckedEdition()
+        {
+            if (xenDesktopEnterpriseRadioButton.Checked)
+                return xos.TrueForAll(x=>Helpers.ClearwaterOrGreater(x.Connection)) ? Host.Edition.XenDesktop : Host.Edition.EnterpriseXD;
+
+            if (platinumRadioButton.Checked)
+                return Host.Edition.Platinum;
+
+            if (enterpriseRadioButton.Checked)
+                return Host.Edition.Enterprise;
+
+            if(advancedRadioButton.Checked)
+                return Host.Edition.Advanced;
+
+            if (perSocketRadioButton.Checked)
+                return Host.Edition.PerSocket;
+
+            if (enterprisePerSocketRadioButton.Checked)
+                return Host.Edition.EnterprisePerSocket;
+
+            if (enterprisePerUserRadioButton.Checked)
+                return Host.Edition.EnterprisePerUser;
+
+            if (desktopRadioButton.Checked)
+                return Host.Edition.Desktop;
+
+            if (desktopPlusRadioButton.Checked)
+                return Host.Edition.DesktopPlus;
+
+            return Host.Edition.StandardPerSocket;
+        }
+
+        private void okButton_Click(object sender, EventArgs e)
+        {
+
+            ApplyLicenseEditionCommand command = new ApplyLicenseEditionCommand(Program.MainWindow, xos, GetCheckedEdition(), licenseServerNameTextBox.Text, licenseServerPortTextBox.Text, this);
+
+            command.Succedded += delegate
+                                     {
+                                         Program.Invoke(this, () =>
+                                            {
+                                                DialogResult = DialogResult.OK;
+                                                Close();
+                                            });
+                                     };
+            command.Execute();
+        }
+
+        private void licenseServerPortTextBox_TextChanged(object sender, EventArgs e)
+        {
+            UpdateButtonEnablement();
+        }
+
+        private void licenseServerNameTextBox_TextChanged(object sender, EventArgs e)
+        {
+            UpdateButtonEnablement();
+        }
+
+        private void UpdateButtonEnablement()
+        {
+            okButton.Enabled = licenseServerPortTextBox.Text.Length > 0 && licenseServerNameTextBox.Text.Length > 0 && Util.IsValidPort(licenseServerPortTextBox.Text);
+        }
+
+        private void AssignLicenseDialog_Shown(object sender, EventArgs e)
+        {
+            CheckCurrentEdition(currentEdition);
+        }
+    }
+}
