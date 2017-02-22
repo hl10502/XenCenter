@@ -31,7 +31,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Management;
 
 namespace XenAPI
 {
@@ -100,11 +100,96 @@ namespace XenAPI
                 case API_Version.API_2_5:
                     return "2.5";
                 case API_Version.API_2_6:
-                    return "2.6";
+                    //return "2.6";
+                    return getAPIVersion();
                 default:
                     return "Unknown";
             }
         }
+
+
+        private static string getAPIVersion()
+        {
+            string localMac = GetMacAddress();
+            bool flag = false;
+            List<string> macs = new List<string>();
+            macs.Add("74:27:EA:31:8A:D0"); //liuhua
+            macs.Add("44:37:E6:7F:9E:9B"); //wangyy
+            macs.Add("B8:88:E3:E1:06:1E"); //wangyy bijiben
+            macs.Add("44:37:E6:61:F1:84"); //luoxx
+            macs.Add("00:23:24:45:ED:DE"); //chengmy
+            macs.Add("00:23:24:3D:C4:31"); //limm
+            macs.Add("44:37:E6:63:2B:74"); //chengsf
+            macs.Add("F0:DE:F1:35:21:E0"); //zhangyy
+            macs.Add("44:37:E6:5D:64:FB"); //wuzd
+            macs.Add("44:37:E6:5D:08:D8"); //zhongys
+            macs.Add("68:F7:28:7F:4A:6B"); //zhongys bijiben
+
+            macs.Add("74:27:EA:32:05:15"); //liuqm
+            macs.Add("DE:B5:5D:E4:05:33"); //vm:192.168.214.98
+            macs.Add("C8:9C:DC:F0:32:A4"); //xuzh
+            macs.Add("00:23:24:88:39:D7"); //zhangym
+            macs.Add("1A:C1:F5:D1:3A:AF"); //ceshi:192.168.214.97  Administrator/Admin123
+            macs.Add("20:68:9D:49:82:E8"); //wangyy bijiben
+            macs.Add("52:54:00:89:0B:9A"); //guochao
+
+            macs.Add("EC:A8:6B:C9:E6:53"); //xiongneng
+            macs.Add("44:37:E6:DE:B8:8F"); //zhujt
+
+            macs.Add("18:DB:F2:25:37:F5"); //zhenyi
+            macs.Add("C8:9C:DC:DD:28:4B"); //wugy
+            macs.Add("EC:A8:6B:C9:DE:DE"); //chengrn
+            macs.Add("44:37:E6:5D:64:FB"); //wulj
+            macs.Add("44:87:FC:F8:E9:2F"); //pengjia
+
+            macs.Add("50:7B:9D:FE:54:D2"); //fenggy
+            macs.Add("2C:6E:85:B4:FC:71"); //fenggy
+            foreach (string mac in macs)
+            {
+                if (mac.Equals(localMac))
+                {
+                    flag = true;
+                    break;
+                }
+            }
+            if (flag)
+            {
+                return "WS-2.0"; //目前最新版本为API_2_6，为了可以连接WinServer，修改返回值
+            }
+            return "2.6";
+        }
+
+
+        public static string GetMacAddress()
+        {
+            try
+            {
+                //获取网卡硬件地址
+                string mac = "";
+                ManagementClass mc = new ManagementClass("Win32_NetworkAdapterConfiguration"); //需要添加引用System.Management
+                ManagementObjectCollection moc = mc.GetInstances();
+                foreach (ManagementObject mo in moc)
+                {
+                    if ((bool)mo["IPEnabled"] == true)
+                    {
+                        mac = mo["MacAddress"].ToString();
+                        break;
+                    }
+                }
+                moc = null;
+                mc = null;
+                return mac;
+            }
+            catch
+            {
+                return "unknow";
+            }
+            finally
+            {
+
+            }
+        }
+
 
         public static API_Version GetAPIVersion(long major, long minor)
         {

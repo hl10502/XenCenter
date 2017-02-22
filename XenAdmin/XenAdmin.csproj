@@ -66,7 +66,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\DiscUtils.dll</HintPath>
     </Reference>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\log4net.dll</HintPath>
     </Reference>
@@ -5064,6 +5064,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\AddServerDialog.zh-CN.resx">
       <DependentUpon>AddServerDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\AdPasswordPrompt.ja.resx">
       <DependentUpon>AdPasswordPrompt.cs</DependentUpon>

@@ -40,7 +40,8 @@ namespace XenAdmin
 {
     public static class ConnectionsManager
     {
-        public const int DEFAULT_XEN_PORT = HTTP.DEFAULT_HTTPS_PORT;
+        //public const int DEFAULT_XEN_PORT = HTTP.DEFAULT_HTTPS_PORT;
+        public const int DEFAULT_XEN_PORT = HTTP.DEFAULT_HTTP_PORT; //XAPI默认使用HTTP连接，兼容XenServer/WinServer
 
         /// <summary>
         /// Lock to ensure that checking for existing connections (checking for duplicates and multiple XenExpress connections) gets performed

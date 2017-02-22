@@ -116,6 +116,7 @@ namespace XenAPI
         public const int MAX_REDIRECTS = 10;
 
         public const int DEFAULT_HTTPS_PORT = 443;
+        public const int DEFAULT_HTTP_PORT = 80;
 
         #region Helper functions
 
@@ -266,8 +267,21 @@ namespace XenAPI
 
             UriBuilder uri = new UriBuilder();
             uri.Scheme = "https";
-            uri.Port = DEFAULT_HTTPS_PORT;
-            uri.Host = hostname;
+            int index = hostname.IndexOf(':');
+            if (index != -1)
+            {
+                uri.Host = hostname.Substring(0, index).Trim();
+                uri.Port = int.Parse(hostname.Substring(index + 1).Trim());
+                if (uri.Port == DEFAULT_HTTP_PORT)
+                {
+                    uri.Scheme = "http";
+                }
+            }
+            else
+            {
+                uri.Port = DEFAULT_HTTPS_PORT;
+                uri.Host = hostname;
+            }
             uri.Path = path;
 
             StringBuilder query = new StringBuilder();

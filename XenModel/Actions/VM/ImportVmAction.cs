@@ -388,6 +388,13 @@ namespace XenAdmin.Actions
                 hostURL = host.address;
             }
 
+            //添加port
+            int port = Connection != null ? Connection.Port : HTTP.DEFAULT_HTTPS_PORT;
+            if (port != 0)
+            {
+                hostURL = hostURL + ":" + port; //ip:port
+            }
+
             log.DebugFormat("Using {0} for import", hostURL);
 
             return HTTPHelper.Put(this, HTTP_PUT_TIMEOUT, m_filename, hostURL,

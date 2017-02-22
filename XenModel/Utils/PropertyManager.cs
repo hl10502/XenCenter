@@ -48,9 +48,9 @@ namespace XenAdmin.Core
         public static string GetFriendlyName(string s)
         {
             string result = FriendlyNames.GetString(s);
-#if DEBUG
-			Debug.Assert(result != null, string.Format("{0} doesn't exist in FriendlyNames", s));
-#endif
+//#if DEBUG
+//            Debug.Assert(result != null, string.Format("{0} doesn't exist in FriendlyNames", s));
+//#endif
             return result;
         }
 
