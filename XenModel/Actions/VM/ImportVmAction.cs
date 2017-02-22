@@ -173,7 +173,9 @@ namespace XenAdmin.Actions
                     List<XenRef<VIF>> vifs = VM.get_VIFs(Session, vmRef);
                     List<XenAPI.Network> networks = new List<XenAPI.Network>();
 
-                    bool canMoveVifs = Helpers.ElyOrGreater(Connection);
+                    bool canMoveVifs = false;
+                    //注释掉VIF move，在WinServer6.5上导入虚拟机测试出错，提示VIF.move方法不存在
+                    //bool canMoveVifs = Helpers.ElyOrGreater(Connection);
 
                     foreach (XenRef<VIF> vif in vifs)
                     {
