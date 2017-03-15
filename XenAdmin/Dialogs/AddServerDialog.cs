@@ -167,14 +167,23 @@ namespace XenAdmin.Dialogs
 
         public virtual void AddButton_Click(object sender, EventArgs e)
         {
+            /**
+             *ip地址与端口，可以一次连接多个主机，以";"分隔
+             *一般我们连接一个，直接使用ip，端口默认使用80
+             */
+            
             string hostnameAndPort = ServerNameComboBox.Text.Trim();
+            //用户名
             string username = UsernameTextBox.Text.Trim();
+            //密码
             string password = PasswordTextBox.Text;
 
+            //多主机
             string[] multipleHosts;
 
             if (TryGetMultipleHosts(hostnameAndPort, out multipleHosts))
             {
+                //循环依次连接
                 foreach (string h in multipleHosts)
                 {
                     ConnectToServer(null, h, ConnectionsManager.DEFAULT_XEN_PORT, username, password, comboBoxClouds.SelectedItem != null ? comboBoxClouds.SelectedItem.ToString() : string.Empty);
@@ -187,9 +196,11 @@ namespace XenAdmin.Dialogs
 
                 if (!StringUtility.TryParseHostname(hostnameAndPort, ConnectionsManager.DEFAULT_XEN_PORT, out hostname, out port))
                 {
+                    //分隔ip与端口
                     hostname = hostnameAndPort;
                     port = ConnectionsManager.DEFAULT_XEN_PORT;
                 }
+                //连接主机
                 ConnectToServer(connection, hostname, port, username, password, comboBoxClouds.SelectedItem != null ? comboBoxClouds.SelectedItem.ToString() : string.Empty);
             }
 

@@ -178,6 +178,7 @@ namespace XenAdmin
         static public void Main(string[] Args)
         {
             //Upgrade settings
+            //获取当前操作系统信息
             System.Reflection.Assembly a = System.Reflection.Assembly.GetExecutingAssembly();
             Version appVersion = a.GetName().Version;
             string appVersionString = appVersion.ToString();
@@ -226,9 +227,12 @@ namespace XenAdmin
             Exiting = false;
             // Clear XenConnections and History so static classes like OtherConfigAndTagsWatcher 
             // listening to changes still work when Main is called more than once.
-            ConnectionsManager.XenConnections.Clear();
-            ConnectionsManager.History.Clear();
 
+            //清空XAPI连接信息
+            ConnectionsManager.XenConnections.Clear();
+            //清空连接的历史信息
+            ConnectionsManager.History.Clear();
+            //初始化搜索
             Search.InitSearch(Branding.Search);
             TreeSearch.InitSearch();
             
@@ -257,6 +261,7 @@ namespace XenAdmin
                     if (Application.RenderWithVisualStyles)
                     {
                         // Vista, Win7 with styles.
+                        //根据操作系统版本设置样式
                         TitleBarStartColor = Color.FromArgb(242, 242, 242);
                         TitleBarEndColor = Color.FromArgb(207, 207, 207);
                         TitleBarBorderColor = Color.FromArgb(160, 160, 160);
@@ -360,6 +365,7 @@ namespace XenAdmin
             Application.ApplicationExit -= Application_ApplicationExit;
             Application.ApplicationExit += Application_ApplicationExit;
 
+            //运行主窗口
             MainWindow mainWindow = new MainWindow(argType, args);
 
             Application.Run(mainWindow);

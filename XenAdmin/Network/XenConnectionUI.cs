@@ -58,6 +58,7 @@ namespace XenAdmin.Network
         public static void BeginConnect(IXenConnection connection, bool interactive, Form owner, bool initiateMasterSearch)
         {
             Program.AssertOnEventThread();
+            //注册连接事件，连接结果与连接状态的处理
             RegisterEventHandlers(connection);
             if (interactive)
             {

@@ -5339,6 +5339,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\NewDiskDialog.zh-CN.resx">
       <DependentUpon>NewDiskDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\NewPoolDialog.ja.resx">
       <DependentUpon>NewPoolDialog.cs</DependentUpon>

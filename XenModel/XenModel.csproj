@@ -569,7 +569,9 @@
       <CustomToolNamespace>XenAPI</CustomToolNamespace>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="XenAPI\FriendlyErrorNames.zh-CN.resx" />
+    <EmbeddedResource Include="XenAPI\FriendlyErrorNames.zh-CN.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommandLib\CommandLib.csproj">

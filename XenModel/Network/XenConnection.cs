@@ -453,11 +453,13 @@ namespace XenAdmin.Network
                 // For elevated session we use the elevated username and password passed into this function, 
                 // as the connection's Username and Password are not updated.
 
+                //创建会话
                 Session session = SessionFactory.CreateSession(this, hostname, port);
                 if (isElevated)
                     session.IsElevatedSession = true;
                 try
                 {
+                    //使用用户名、密码登录
                     session.login_with_password(uname, pwd, !string.IsNullOrEmpty(Version) ? Version : Helper.APIVersionString(API_Version.LATEST), Session.UserAgent);
                     return session;
                 }
@@ -637,13 +639,16 @@ namespace XenAdmin.Network
             {
                 if (connectTask == null)
                 {
+                    //清除事件队列
                     ClearEventQueue();
                     OnBeforeMajorChange(false);
                     Cache.Clear();
                     OnAfterMajorChange(false);
+                    //设置连接任务对象
                     connectTask = new ConnectTask(Hostname, Port);
                     StopMonitor();
                     heartbeat = new Heartbeat(this, XenAdminConfigManager.Provider.ConnectionTimeout);
+                    //开启连接工作线程
                     Thread t = new Thread(ConnectWorkerThread);
                     t.Name = "Connection to " + Hostname;
                     t.IsBackground = true;
@@ -1200,7 +1205,7 @@ namespace XenAdmin.Network
             try
             {
                 log.DebugFormat("IXenConnection: trying to connect to {0}", HostnameWithPort);
-
+                //创建连接会话
                 Session session = NewSession(task.Hostname, task.Port, Username, Password, false);
                 // Save the session so we can log it out later
                 task.Session = session;
