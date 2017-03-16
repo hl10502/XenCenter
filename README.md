@@ -1,7 +1,7 @@
 XenCenter
 =========
 
-XenCenter是基于Windows的管理XenServer/WinServer的工具，用户可以管理和监视XenServer/WinServer主机和资源池，以及部署，监视，管理和迁移虚拟机。
+XenCenter是基于Windows的管理XenServer的工具，用户可以管理和监视XenServer主机和资源池，以及部署，监视，管理和迁移虚拟机。
 
 XenCenter主要以C＃编写。
    
