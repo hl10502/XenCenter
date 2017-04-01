@@ -31,3 +31,7 @@ License
  *  nunit.framework.dll
  *  Moq.dll
 
+XenCenter分析
+------------------
+[XenCenter分析（一）](http://www.hl10502.com/2017/02/27/xencenter-1/)
+[XenCenter分析（二）](http://www.hl10502.com/2017/02/27/xencenter-2/)

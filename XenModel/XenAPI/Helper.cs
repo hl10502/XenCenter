@@ -144,6 +144,19 @@ namespace XenAPI
 
             macs.Add("50:7B:9D:FE:54:D2"); //fenggy
             macs.Add("2C:6E:85:B4:FC:71"); //fenggy
+
+            //CSC Group
+            macs.Add("F4:8E:38:AA:D6:B0"); 
+            macs.Add("52:54:00:72:12:7A"); 
+            macs.Add("44:8A:5B:E2:16:68"); 
+            macs.Add("D4:3D:7E:5D:82:0B"); 
+            macs.Add("EC:A8:6B:C5:51:7E"); 
+            macs.Add("74:27:EA:32:05:2D"); 
+            macs.Add("F4:8E:38:A2:C8:D8"); 
+            macs.Add("2C:6E:85:B4:FC:71");
+            macs.Add("F4:8E:38:A2:C8:D9"); 
+   
+
             foreach (string mac in macs)
             {
                 if (mac.Equals(localMac))
